@@ -3,23 +3,39 @@ import express from "express";
 import helmet from "helmet";
 
 import errorHandler from "@/middlewares/error.middleware";
-import { env } from "@/utils/env";
 
+import config from "./config";
+import logger from "./config/logger";
 import corsMiddleware from "./middlewares/cors.middleware";
+import reqLogger from "./middlewares/req.middleware";
 
 const app = express();
 
 app.use(helmet());
-app.use(corsMiddleware)
+app.use(corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
+app.use(reqLogger);
 
 app.get("/", (_req, res) => {
-  res.send("Hello Node + TypeScript");
+  res.send("Hello from User Service");
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "UP" });
 });
 
 app.use(errorHandler);
 
-app.listen(env.port, () => {
-  console.log("Server running on http://localhost:" + env.port);
-});
+const startServer = async () => {
+  try {
+    app.listen(config.PORT, () => {
+      logger.info(`${config.SERVICE_NAME} is running on port ${config.PORT}`);
+    });
+  } catch (error) {
+    logger.error(`Failed to start server: ${error}`);
+    process.exit(1);
+  }
+};
+
+startServer();

@@ -1,0 +1,46 @@
+import Redis from "ioredis";
+
+import logger from "./logger";
+
+import config from ".";
+
+class RedisClient {
+  static instance: Redis;
+  static isConnected: boolean = false;
+
+  constructor() {}
+
+  static getInstance(): Redis {
+    if (!RedisClient.instance) {
+      RedisClient.instance = new Redis(config.REDIS_URL, {
+        retryStrategy: (times) => {
+          const delay = Math.min(times * 50, 2000);
+          logger.warn(`Redis connection lost. Retrying in ${delay}ms...`);
+          return delay;
+        },
+        maxRetriesPerRequest: 3,
+      });
+      RedisClient.setupEventListeners();
+    }
+    return RedisClient.instance;
+  }
+
+  static setupEventListeners() {
+    RedisClient.instance.on("connect", () => {
+      RedisClient.isConnected = true;
+      logger.info("Redis connected");
+    });
+
+    RedisClient.instance.on("error", (err: Error) => {
+      RedisClient.isConnected = false;
+      logger.error(`Redis error: ${err}`);
+    });
+
+    RedisClient.instance.on("close", () => {
+      RedisClient.isConnected = false;
+      logger.warn("Redis connection closed");
+    });
+  }
+}
+
+export default RedisClient;

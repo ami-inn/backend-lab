@@ -1,6 +1,8 @@
 const config = {
     SERVICE_NAME: process.env.SERVICE_NAME || 'user-service',
     PORT: process.env.PORT || 4001,
+    OTP_TTL: process.env.OTP_TTL || 300,
+    MAIL_SEND: process.env.MAIL_SEND || '',
     NODE_ENV: process.env.NODE_ENV || 'development',
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/irctc',

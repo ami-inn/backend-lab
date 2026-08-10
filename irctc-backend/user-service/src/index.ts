@@ -5,9 +5,12 @@ import helmet from "helmet";
 import errorHandler from "@/middlewares/error.middleware";
 import { env } from "@/utils/env";
 
+import corsMiddleware from "./middlewares/cors.middleware";
+
 const app = express();
 
 app.use(helmet());
+app.use(corsMiddleware)
 app.use(express.json());
 app.use(cookieParser());
 

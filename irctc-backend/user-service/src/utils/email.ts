@@ -1,5 +1,8 @@
-import config from "@/config";
 import sgMail from "@sendgrid/mail";
+
+import config from "@/config";
+
+
 import "dotenv/config";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);

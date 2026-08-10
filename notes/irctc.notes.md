@@ -79,3 +79,10 @@ docker compose down command is used to stop and remove the containers, networks,
 
 
 docker compose up --build command is used to build the images (if necessary) and start the containers as specified in the configuration. It is useful when you have made changes to the Dockerfile or the application code and want to rebuild the images before starting the containers.
+
+docker compose up to start the services defined in the docker-compose.yml file. It builds the images (if necessary) and starts the containers as specified in the configuration.
+
+
+npx prisma init --datasource-provider postgresql command is used to initialize a new Prisma project with a PostgreSQL datasource. It creates a new Prisma schema file (schema.prisma) and sets up the necessary configuration for connecting to a PostgreSQL database. This command is useful when you want to start using Prisma with a PostgreSQL database in your project.
+
+npx prisma migrate dev --name init command is used to create a new migration and apply it to the database in a development environment. The --name init option specifies the name of the migration, which in this case is "init". This command generates SQL migration files based on the changes made to the Prisma schema and applies them to the connected database. It is useful for managing database schema changes during development.

@@ -45,22 +45,26 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+
+
 export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
-  const { otp } = req.body;
-  const otpSessionId = req.cookies.otp_session;
+  console.log("Received request body:", req.body);
+
+  const { otp } = req.body as { otp?: string };
+  const otpSessionId = req.cookies?.otpSessionId as string | undefined;
+
+  console.log("Received OTP:", otp);
+  console.log("Received OTP Session ID from cookie:", otpSessionId);
 
   if (!otp || !otpSessionId) {
     throw new BadRequestError("Missing required fields: otp, otpSessionId");
   }
 
-  const isValidOtp = await authService.verifyOtp(otp, otpSessionId);
-
-  if (!isValidOtp) {
-    throw new BadRequestError("Invalid OTP or OTP has expired");
-  }
+  const user = await authService.verifyOtp(otp, otpSessionId);
 
   res.status(200).json({
     success: true,
     message: "OTP verified successfully",
+    data: user,
   });
 });

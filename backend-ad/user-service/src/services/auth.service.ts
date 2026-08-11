@@ -45,6 +45,7 @@ import { generateAndStoreOtp, verifyOtp as verifyOtpValue } from "@/utils/otp";
 
 const verifyOtp = async (otp: string, otpSessionId: string) => {
   const meta = await verifyOtpValue(otp, otpSessionId);
+  console.log("Meta after OTP verification:", meta);
 
   if (meta == null) {
     throw new BadRequestError("Invalid OTP or OTP has expired");
@@ -52,8 +53,8 @@ const verifyOtp = async (otp: string, otpSessionId: string) => {
 
   const user = await prisma.user.create({
     data: {
-      firstName: meta.firstName,
-      lastName: meta.lastName,
+      firstName: meta.firstName ?? "",
+      lastName: meta.lastName ?? "",
       email: meta.email,
       password: meta.password!,
       emailVerified: true,

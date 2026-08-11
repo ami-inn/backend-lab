@@ -42,22 +42,35 @@ export const verifyOtp = async (otp: string, otpSessionId: string) => {
     if(!rawData) {
         return null;
     }
-    const { hashedOtp:storedOtp,meta } = JSON.parse(rawData);
-    const attemptsKey = `otp:attempts:${meta.email}`; // user can verify otp 3 times only
-    // check if user has exceeded the maximum number of attempts
 
+    const sessionData = JSON.parse(rawData) as {
+        firstName?: string;
+        lastName?: string;
+        email: string;
+        password?: string;
+        hashedOtp: string;
+    };
+
+    const attemptsKey = `otp:attempts:${sessionData.email}`;
     const attemptsCount = parseInt(await redis.get(attemptsKey) || "0", 10);
 
     if(attemptsCount >= ATTEMPT_MAX) {
         throw new TooManyRequestsError("You have exceeded the maximum number of OTP verification attempts. Please try again after 1 hour.");
     }
-    const hashedOtp = hmacFor(meta.email, otp);
-    if(!crypto.timingSafeEqual(Buffer.from(hashedOtp,'hex'), Buffer.from(storedOtp,'hex'))) {
+
+    const hashedOtp = hmacFor(sessionData.email, otp);
+    if(!crypto.timingSafeEqual(Buffer.from(hashedOtp,'hex'), Buffer.from(sessionData.hashedOtp,'hex'))) {
         await redis.incr(attemptsKey);
-        await redis.expire(attemptsKey, 3600); // Set the expiration time for the attempts key to 1 hour
+        await redis.expire(attemptsKey, 3600);
         return null;
     }
+
     await redis.del(`otp:session:${otpSessionId}`);
-    await redis.del(`otp:rate:${meta.email}`); // reset the rate limit on successful verification
-    return meta;
+    await redis.del(`otp_rate:${sessionData.email}`);
+    return {
+        firstName: sessionData.firstName,
+        lastName: sessionData.lastName,
+        email: sessionData.email,
+        password: sessionData.password,
+    };
 }

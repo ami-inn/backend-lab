@@ -4,6 +4,8 @@ import logger from "./logger";
 
 import config from ".";
 
+const redisUrl = config.REDIS_URL;
+
 class RedisClient {
   static instance: Redis | null = null;
   static isConnected: boolean = false;
@@ -12,7 +14,7 @@ class RedisClient {
 
   static getInstance(): Redis {
     if (!RedisClient.instance) {
-      RedisClient.instance = new Redis(config.REDIS_URL, {
+      RedisClient.instance = new Redis(redisUrl, {
         retryStrategy: (times) => {
           const delay = Math.min(times * 50, 2000);
           logger.warn(`Redis connection lost. Retrying in ${delay}ms...`);

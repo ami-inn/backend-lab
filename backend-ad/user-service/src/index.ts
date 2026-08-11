@@ -8,6 +8,7 @@ import config from "./config";
 import logger from "./config/logger";
 import corsMiddleware from "./middlewares/cors.middleware";
 import reqLogger from "./middlewares/req.middleware";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 app.use(reqLogger);
+app.use("/api/v1/auth", authRoutes);
 
 app.get("/", (_req, res) => {
   res.send("Hello from User Service");

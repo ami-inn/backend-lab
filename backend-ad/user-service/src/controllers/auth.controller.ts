@@ -7,6 +7,9 @@ import asyncHandler from "@/utils/asyncHandler";
 import { BadRequestError } from "@/utils/error";
 
 export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    
+  
   const { firstName, lastName, email, password, confirmPassword } = req.body as SendOtpRequestBody;
 
   if (!firstName || !lastName || !email || !password) {
@@ -32,4 +35,12 @@ export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
       success: true,
       message: "OTP sent successfully",
     });
+
+  } catch (error) {
+    console.error("Error in sendOtp controller:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 });

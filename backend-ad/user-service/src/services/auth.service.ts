@@ -2,9 +2,9 @@ import bcrypt from "bcrypt";
 
 import { prisma } from "@/config/prisma";
 import { SendOtpRequestBody } from "@/types/auth.types";
-import { sendOtpEmail } from "@/utils/email";
-import { ConflictError } from "@/utils/error";
-import { generateAndStoreOtp } from "@/utils/otp";
+import { sendOtpEmail, sendAccountCreatedEmail } from "@/utils/email";
+import { BadRequestError, ConflictError } from "@/utils/error";
+import { generateAndStoreOtp, verifyOtp as verifyOtpValue } from "@/utils/otp";
 
 
  const sendOtp = async ({
@@ -44,11 +44,30 @@ import { generateAndStoreOtp } from "@/utils/otp";
 
 
 const verifyOtp = async (otp: string, otpSessionId: string) => {
+  const meta = await verifyOtpValue(otp, otpSessionId);
 
-}
+  if (meta == null) {
+    throw new BadRequestError("Invalid OTP or OTP has expired");
+  }
+
+  const user = await prisma.user.create({
+    data: {
+      firstName: meta.firstName,
+      lastName: meta.lastName,
+      email: meta.email,
+      password: meta.password!,
+      emailVerified: true,
+    },
+  });
+
+  await sendAccountCreatedEmail(meta.email);
+
+  return user;
+};
 
 
 
 export const authService = {
     sendOtp,
+    verifyOtp,
 };

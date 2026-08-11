@@ -85,26 +85,22 @@ async function sendOtpEmail(to: string, otp: string) {
   }
 }
 
-async function verifyOtpEmail(to: string, otp: string) {
+async function sendAccountCreatedEmail(to: string) {
   const msg = {
     to,
     from: {
       email: fromEmail,
       name: "IRCTC",
     },
-    subject: "Your OTP Verification for IRCTC",
-    text: `Your OTP is ${otp}. It will expire in ${minutes} minutes.`,
-    html: `
-      <strong>
-        Your OTP is ${otp}. It will expire in ${minutes} minutes.
-      </strong>
-    `,
+    subject: "Welcome to IRCTC",
+    text: "Your account has been created successfully.",
+    html: "<strong>Your account has been created successfully.</strong>",
   };
 
   try {
     await sgMail.send(msg);
 
-    console.log("OTP verification email sent successfully");
+    console.log("Account created email sent successfully");
   } catch (error: unknown) {
     const errorDetails = getSendGridErrorDetails(error);
 
@@ -115,10 +111,8 @@ async function verifyOtpEmail(to: string, otp: string) {
 
     console.error("SENDGRID STATUS:", errorDetails.code);
 
-    throw new InternalServerError(
-      "Failed to send OTP verification email"
-    );
+    throw new InternalServerError("Failed to send account created email");
   }
 }
 
-export { sendOtpEmail, verifyOtpEmail };
+export { sendOtpEmail, sendAccountCreatedEmail };

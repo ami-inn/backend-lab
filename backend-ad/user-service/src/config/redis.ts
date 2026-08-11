@@ -5,7 +5,7 @@ import logger from "./logger";
 import config from ".";
 
 class RedisClient {
-  static instance: Redis;
+  static instance: Redis | null = null;
   static isConnected: boolean = false;
 
   constructor() {}
@@ -22,10 +22,15 @@ class RedisClient {
       });
       RedisClient.setupEventListeners();
     }
+
     return RedisClient.instance;
   }
 
   static setupEventListeners() {
+    if (!RedisClient.instance) {
+      return;
+    }
+
     RedisClient.instance.on("connect", () => {
       RedisClient.isConnected = true;
       logger.info("Redis connected");
@@ -43,4 +48,7 @@ class RedisClient {
   }
 }
 
+const redis = RedisClient.getInstance();
+
+export { redis };
 export default RedisClient;

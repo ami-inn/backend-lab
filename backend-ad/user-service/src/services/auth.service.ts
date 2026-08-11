@@ -43,6 +43,11 @@ import { generateAndStoreOtp } from "@/utils/otp";
 };
 
 
+const verifyOtp = async (otp: string, otpSessionId: string) => {
+
+}
+
+
 
 export const authService = {
     sendOtp,

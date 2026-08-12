@@ -9,6 +9,8 @@ const config = {
     MAIL_SEND: process.env.MAIL_SEND || '',
     HMAC_SECRET: process.env.HMAC_SECRET || 'default_secret',
     NODE_ENV: process.env.NODE_ENV || 'development',
+    JWT_SECRET: process.env.JWT_SECRET || 'default_jwt_secret',
+    JWT_EXPIRATION: process.env.JWT_EXPIRATION || '1h',
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://admin:irctcpass@localhost:5432/postgres',
     REDIS_URL: process.env.REDIS_URL || 'redis://:irctcpass@localhost:6379',

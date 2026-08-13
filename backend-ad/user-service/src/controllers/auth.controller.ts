@@ -6,7 +6,7 @@ import { authService } from "@/services/auth.service";
 import type { SendOtpRequestBody } from "@/types/auth.types";
 import asyncHandler from "@/utils/asyncHandler";
 import { getDeviceFingerprint } from "@/utils/deviceFingerPrint";
-import { BadRequestError } from "@/utils/error";
+import { BadRequestError, UnauthorizedError } from "@/utils/error";
 
 const getTokenMaxAge = (token: string): number => {
   const payload = jwt.decode(token);
@@ -116,3 +116,38 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 });
+
+
+//generate new access token and refresh token using the refresh token stored in cookie
+export const rotateRefreshToken = asyncHandler(async (req: Request, res: Response) => {
+  const refreshToken = req.cookies?.refreshToken as string | undefined;
+
+  if (!refreshToken) {
+    throw new UnauthorizedError("Missing required field: refreshToken");
+  }
+  const deviceId = getDeviceFingerprint(req);
+  const {newAccessToken, newRefreshToken} = await authService.rotateRefreshToken(refreshToken, deviceId);
+
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: getTokenMaxAge(newRefreshToken),
+    sameSite: "strict",
+  });
+  res.cookie("accessToken", newAccessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: getTokenMaxAge(newAccessToken),
+    sameSite: "strict",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Refresh token rotated successfully",
+    data: {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+  
+    },
+  });
+})

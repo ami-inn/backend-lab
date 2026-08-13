@@ -5,15 +5,18 @@ import jwt from "jsonwebtoken";
 import config from "@/config";
 import logger from "@/config/logger";
 
-const JWT_SECRET = config.JWT_SECRET || "default_jwt_secret";
+const JWT_ACCESS_SECRET = config.JWT_ACCESS_SECRET;
+const JWT_EXPIRATION = config.JWT_ACCESS_EXPIRATION;
+const JWT_REFRESH_SECRET = config.JWT_REFRESH_SECRET;
+const JWT_REFRESH_EXPIRATION = config.JWT_REFRESH_EXPIRATION;
 
 export const generateAccessToken = (userId: string): string => {
   const payload = {id: userId };
-  const expiresIn = config.JWT_EXPIRATION as jwt.SignOptions["expiresIn"];
+  const expiresIn = JWT_EXPIRATION as jwt.SignOptions["expiresIn"];
   const options: jwt.SignOptions = { expiresIn };
 
   try {
-    return jwt.sign(payload, JWT_SECRET, options);
+    return jwt.sign(payload, JWT_ACCESS_SECRET, options);
   } catch (error) {
     logger.error("Error generating access token:", error);
     throw new Error("Failed to generate access token");
@@ -22,11 +25,11 @@ export const generateAccessToken = (userId: string): string => {
 
 export const generateRefreshToken = (userId: string): string => {
   const payload = { id: userId,jti: crypto.randomUUID() }; // Include a unique identifier (jti) for the refresh token
-  const expiresIn = "7d"; // Refresh token valid for 7 days
+  const expiresIn = JWT_REFRESH_EXPIRATION as jwt.SignOptions["expiresIn"];
   const options: jwt.SignOptions = { expiresIn };
 
   try {
-    return jwt.sign(payload, JWT_SECRET, options);
+    return jwt.sign(payload, JWT_REFRESH_SECRET, options);
   } catch (error) {
     logger.error("Error generating refresh token:", error);
     throw new Error("Failed to generate refresh token");
@@ -36,7 +39,7 @@ export const generateRefreshToken = (userId: string): string => {
 
 export const verifyAccessToken = (token: string): { id: string } => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, JWT_ACCESS_SECRET) as { id: string };
     return decoded;
   } catch (error) {
     logger.error("Error verifying access token:", error);
@@ -46,7 +49,7 @@ export const verifyAccessToken = (token: string): { id: string } => {
 
 export const verifyRefreshToken = (token: string): { id: string; jti: string } => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; jti: string };
+    const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as { id: string; jti: string };
     return decoded;
   } catch (error) {
     logger.error("Error verifying refresh token:", error);

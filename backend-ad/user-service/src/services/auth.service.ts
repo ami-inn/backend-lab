@@ -1,12 +1,14 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
+import config from "@/config";
 import { prisma } from "@/config/prisma";
+import { redis } from "@/config/redis";
 import { SendOtpRequestBody } from "@/types/auth.types";
+import { generateAccessToken, generateRefreshToken } from "@/utils/auth";
 import { sendOtpEmail, sendAccountCreatedEmail } from "@/utils/email";
 import { BadRequestError, ConflictError } from "@/utils/error";
 import { generateAndStoreOtp, verifyOtp as verifyOtpValue } from "@/utils/otp";
-import { generateAccessToken, generateRefreshToken } from "@/utils/auth";
-
 
  const sendOtp = async ({
   firstName,
@@ -85,6 +87,16 @@ const login = async ({ email, password, deviceId }: { email: string; password: s
   // Here you can generate access and refresh tokens using your auth utility functions
   const accessToken = generateAccessToken(user.id);
   const refreshToken = generateRefreshToken(user.id);
+
+  const {jti} = jwt.decode(refreshToken) as { jti: string }; // Extract the jti from the refresh token
+
+  // Store the refresh token in redis
+  await redis.set(`refresh:${user.id}:${deviceId}`, jti, 'EX', config.JWT_REFRESH_EXPIRES_IN);
+  const loggedInUser = Object.fromEntries(
+    Object.entries(user).filter(([key]) => key !== "password"),
+  );
+  await redis.set(`user:${user.id}`, JSON.stringify(loggedInUser), 'EX', config.REDIS_TTL);
+  
 
 
   return {

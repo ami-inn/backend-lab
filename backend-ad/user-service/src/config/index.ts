@@ -13,9 +13,11 @@ const config = {
     JWT_ACCESS_EXPIRATION: process.env.JWT_ACCESS_EXPIRATION || '15m',
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'default_refresh_secret',
     JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '7d',
+    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || 604800, // 7 days in seconds
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://admin:irctcpass@localhost:5432/postgres',
     REDIS_URL: process.env.REDIS_URL || 'redis://:irctcpass@localhost:6379',
+    REDIS_TTL: process.env.REDIS_TTL || 86400, // 24 hours in seconds
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001'],
 };
 

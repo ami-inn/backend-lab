@@ -1,11 +1,22 @@
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 
 import config from "@/config";
 import { authService } from "@/services/auth.service";
 import type { SendOtpRequestBody } from "@/types/auth.types";
 import asyncHandler from "@/utils/asyncHandler";
-import { BadRequestError } from "@/utils/error";
 import { getDeviceFingerprint } from "@/utils/deviceFingerPrint";
+import { BadRequestError } from "@/utils/error";
+
+const getTokenMaxAge = (token: string): number => {
+  const payload = jwt.decode(token);
+
+  if (typeof payload !== "object" || payload === null || typeof payload.exp !== "number") {
+    throw new Error("Token is missing an expiration claim");
+  }
+
+  return Math.max(0, payload.exp * 1000 - Date.now());
+};
 
 export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -86,13 +97,13 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    maxAge: Number(config.JWT_REFRESH_EXPIRATION) * 1000,
+    maxAge: getTokenMaxAge(refreshToken),
     sameSite: "strict",
   });
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    maxAge: Number(config.JWT_ACCESS_EXPIRATION) * 1000,
+    maxAge: getTokenMaxAge(accessToken),
     sameSite: "strict",
   });
   res.status(200).json({

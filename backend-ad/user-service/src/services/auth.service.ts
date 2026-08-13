@@ -5,6 +5,7 @@ import { SendOtpRequestBody } from "@/types/auth.types";
 import { sendOtpEmail, sendAccountCreatedEmail } from "@/utils/email";
 import { BadRequestError, ConflictError } from "@/utils/error";
 import { generateAndStoreOtp, verifyOtp as verifyOtpValue } from "@/utils/otp";
+import { generateAccessToken, generateRefreshToken } from "@/utils/auth";
 
 
  const sendOtp = async ({
@@ -66,9 +67,41 @@ const verifyOtp = async (otp: string, otpSessionId: string) => {
   return user;
 };
 
+const login = async ({ email, password, deviceId }: { email: string; password: string; deviceId: string }) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new BadRequestError("Invalid email or password");
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password!);
+
+  if (!isPasswordValid) {
+    throw new BadRequestError("Invalid email or password");
+  }
+
+  // Here you can generate access and refresh tokens using your auth utility functions
+  const accessToken = generateAccessToken(user.id);
+  const refreshToken = generateRefreshToken(user.id);
+
+
+  return {
+    accessToken,
+    refreshToken,
+    loggedInUser: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    },
+  };
+
+}
 
 
 export const authService = {
     sendOtp,
     verifyOtp,
+    login
 };

@@ -5,6 +5,7 @@ import { authService } from "@/services/auth.service";
 import type { SendOtpRequestBody } from "@/types/auth.types";
 import asyncHandler from "@/utils/asyncHandler";
 import { BadRequestError } from "@/utils/error";
+import { getDeviceFingerprint } from "@/utils/deviceFingerPrint";
 
 export const sendOtp = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -66,5 +67,41 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: "OTP verified successfully",
     data: user,
+  });
+});
+
+
+
+export const login = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = req.body as { email: string; password: string };
+
+  if (!email || !password) {
+    throw new BadRequestError("Missing required fields: email, password");
+  }
+  const deviceId =getDeviceFingerprint(req);
+
+
+
+  const {accessToken,refreshToken,loggedInUser} = await authService.login({ email, password, deviceId });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: Number(config.JWT_REFRESH_EXPIRATION) * 1000,
+    sameSite: "strict",
+  });
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: Number(config.JWT_ACCESS_EXPIRATION) * 1000,
+    sameSite: "strict",
+  });
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    data: {
+      accessToken,
+      refreshToken,
+      loggedInUser,
+    },
   });
 });

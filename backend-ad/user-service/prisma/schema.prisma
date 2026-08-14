@@ -16,4 +16,26 @@ model User {
     emailVerified Boolean  @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    AuthProvider AuthProvider[]
+
+
+}
+
+
+model AuthProvider {
+    id        String   @id @default(cuid())
+    provider  String
+    providerId String
+    userId    String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user      User     @relation(fields: [userId], references: [id],onDelete: Cascade)
+
+    @@unique([provider, providerId])
+    @@unique([userId, provider]) //one user can have only one provider of each type 
+    @@index([userId])
+
 }

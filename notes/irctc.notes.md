@@ -86,3 +86,42 @@ docker compose up to start the services defined in the docker-compose.yml file. 
 npx prisma init --datasource-provider postgresql command is used to initialize a new Prisma project with a PostgreSQL datasource. It creates a new Prisma schema file (schema.prisma) and sets up the necessary configuration for connecting to a PostgreSQL database. This command is useful when you want to start using Prisma with a PostgreSQL database in your project.
 
 npx prisma migrate dev --name init command is used to create a new migration and apply it to the database in a development environment. The --name init option specifies the name of the migration, which in this case is "init". This command generates SQL migration files based on the changes made to the Prisma schema and applies them to the connected database. It is useful for managing database schema changes during development.
+
+
+
+google authentication implementation:
+
+google auth 2.0 is a protocol that allows users to authenticate with their Google account and authorize third-party applications to access their data. It provides a secure and standardized way for users to log in to applications without having to create a new account or remember additional passwords. It provides for both authorization flow and authentication flow. It allows users to grant permissions to applications to access their Google account data, such as email, contacts, and calendar events, without sharing their login credentials. This enables developers to build applications that can securely access user data while maintaining user privacy and security.
+
+google identity services is a set of tools and APIs provided by Google that enable developers to integrate Google authentication and authorization into their applications. It includes features such as sign-in with Google, user profile management, and access control for Google APIs.
+
+
+steps
+user click signin with google button
+google show different accounts
+user select account
+google returns id_token jwt to frontend
+frontend send id_token to backend
+backend verify id_token with google api
+backend creates/find user and issues your own jwt access and refresh tokens
+
+
+
+structure
+
+{
+    header:{
+        alg: "RS256",
+        kid: "f0e1d2c3b4a59687786958a7b6c5d4e3f2g1h0i",
+        typ: "JWT"
+    },
+    payload:{
+        iss: "https://accounts.google.com",
+        sub: "1234567890",
+        azp: "your-client-id.apps.googleusercontent.com",
+        aud: "your-client-id.apps.googleusercontent.com",
+        iat: 1620000000,
+        exp: 1620003600,
+        email: "user@example.com"
+    }
+}

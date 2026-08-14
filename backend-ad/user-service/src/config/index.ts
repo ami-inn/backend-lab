@@ -19,7 +19,15 @@ const config = {
     REDIS_URL: process.env.REDIS_URL || 'redis://:irctcpass@localhost:6379',
     REDIS_TTL: process.env.REDIS_TTL || 86400, // 24 hours in seconds
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001'],
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+    GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || '',
 };
+
+if(!config.GOOGLE_CLIENT_ID || !config.GOOGLE_CLIENT_SECRET || !config.GOOGLE_REDIRECT_URI) {
+    
+    console.warn("Google OAuth credentials are not set. Google login will not work.");
+}
 
 export default config;
 

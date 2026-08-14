@@ -1,0 +1,25 @@
+import {Request, Response, NextFunction } from "express";
+
+import { verifyAccessToken } from "@/utils/auth";
+import { UnauthorizedError } from "@/utils/error";
+
+
+export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        throw new UnauthorizedError("Authorization header missing or malformed");
+    }
+
+    const accessToken = authHeader.split(" ")[1];
+
+    try {
+        const decoded = verifyAccessToken(accessToken);
+    
+        // // Attach the decoded user information to the request object for further use
+        // req.user = decoded;
+        // next();
+    } catch (error) {
+        throw new UnauthorizedError("Invalid or expired access token");
+    }
+};

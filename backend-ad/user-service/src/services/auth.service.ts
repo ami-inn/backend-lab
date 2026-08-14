@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 
 import config from "@/config";
@@ -9,6 +10,8 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@
 import { sendOtpEmail, sendAccountCreatedEmail } from "@/utils/email";
 import { BadRequestError, ConflictError, ForbiddenError } from "@/utils/error";
 import { generateAndStoreOtp, verifyOtp as verifyOtpValue } from "@/utils/otp";
+
+const client = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 
  const sendOtp = async ({
   firstName,
@@ -141,10 +144,30 @@ const rotateRefreshToken = async (refreshToken: string, deviceId: string) => {
   };
 };
 
+const verifyGoogleIdToken = async (idToken: string) => {
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: config.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+
+  if (!payload?.sub || !payload.email) {
+    throw new BadRequestError("Invalid Google ID token");
+  }
+  return {
+    provider:payload.iss,
+    providerId: payload.sub,
+    googleId: payload.sub,
+    email: payload.email,
+    firstName: payload.given_name || "",
+    lastName: payload.family_name || "",
+  };
+}
 
 export const authService = {
     sendOtp,
     verifyOtp,
     login,
-    rotateRefreshToken
+    rotateRefreshToken,
+    verifyGoogleIdToken
 };

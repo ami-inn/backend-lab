@@ -151,3 +151,24 @@ export const rotateRefreshToken = asyncHandler(async (req: Request, res: Respons
     },
   });
 })
+
+
+
+//googelauth
+
+
+export const verifyGoogleIdToken = asyncHandler(async (req: Request, res: Response) => {
+  const { idToken } = req.body as { idToken?: string };
+
+  if (!idToken) {
+    throw new BadRequestError("invalid request: idToken is required");
+  }
+
+  const googleUser = await authService.verifyGoogleIdToken(idToken);
+
+  res.status(200).json({
+    success: true,
+    message: "Google ID token verified successfully",
+    data: googleUser,
+  });
+});

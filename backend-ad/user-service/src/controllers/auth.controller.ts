@@ -164,11 +164,28 @@ export const verifyGoogleIdToken = asyncHandler(async (req: Request, res: Respon
     throw new BadRequestError("invalid request: idToken is required");
   }
 
-  const googleUser = await authService.verifyGoogleIdToken(idToken);
+    const deviceId =getDeviceFingerprint(req);
+
+
+
+  const { accessToken, refreshToken, loggedInUser } = await authService.verifyGoogleIdToken(idToken, deviceId);
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: getTokenMaxAge(refreshToken),
+    sameSite: "strict",
+  });
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: getTokenMaxAge(accessToken),
+    sameSite: "strict",
+  });
 
   res.status(200).json({
     success: true,
     message: "Google ID token verified successfully",
-    data: googleUser,
+    data: loggedInUser,
   });
 });

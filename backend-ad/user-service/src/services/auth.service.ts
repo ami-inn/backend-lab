@@ -144,25 +144,114 @@ const rotateRefreshToken = async (refreshToken: string, deviceId: string) => {
   };
 };
 
-const verifyGoogleIdToken = async (idToken: string) => {
+const verifyGoogleIdToken = async (idToken: string, deviceId: string) => {
   const ticket = await client.verifyIdToken({
     idToken,
     audience: config.GOOGLE_CLIENT_ID,
+
   });
   const payload = ticket.getPayload();
 
   if (!payload?.sub || !payload.email) {
     throw new BadRequestError("Invalid Google ID token");
   }
-  return {
-    provider:payload.iss,
+ const googleUser = {
+    provider: payload.iss,
     providerId: payload.sub,
-    googleId: payload.sub,
     email: payload.email,
     firstName: payload.given_name || "",
     lastName: payload.family_name || "",
-  };
-}
+    emailVerified: payload.email_verified || false,
+  
+ };
+
+
+ //transaction using here
+
+ const user = await prisma.$transaction(async (tx) => {
+    const googleAuth = await tx.authProvider.findUnique({
+      where:{
+        provider_providerId: {
+          provider: googleUser.provider,
+          providerId: googleUser.providerId,
+        },
+      },
+      include: {
+        user: true,
+      },
+    })
+
+    if(googleAuth) {
+      return googleAuth.user;
+    } else {
+      // Check if a user with the same email already exists
+      const existingUser = await tx.user.findUnique({
+        where: { email: googleUser.email },
+      });
+
+      if (existingUser) {
+        await tx.authProvider.create({
+          data: {
+            provider: googleUser.provider,
+            providerId: googleUser.providerId,
+            userId: existingUser.id,
+          },
+        });
+        return existingUser;
+      }
+
+      // Create a new user and authProvider entry
+      const newUser = await tx.user.create({
+        data: {
+          firstName: googleUser.firstName,
+          lastName: googleUser.lastName,
+          email: googleUser.email,
+          emailVerified: googleUser.emailVerified,
+          AuthProvider: {
+            create: {
+              provider: googleUser.provider,
+              providerId: googleUser.providerId,
+            },
+          },
+        },
+      });
+
+  
+
+      return newUser;
+    }
+
+
+  });
+
+  //access token and refresh token generte
+
+  const accessToken = generateAccessToken(user.id);
+  const refreshToken = generateRefreshToken(user.id);
+  const { jti } = jwt.decode(refreshToken) as { jti: string }; // Extract the jti from the refresh token
+
+  // Store the refresh token in redis
+  await redis.set(`refresh:${user.id}:${deviceId}`, jti, 'EX', config.JWT_REFRESH_EXPIRES_IN);
+  const loggedInUser = Object.fromEntries(
+    Object.entries(user).filter(([key]) => key !== "password"),
+  );
+  await redis.set(`user:${user.id}`, JSON.stringify(loggedInUser), 'EX', config.REDIS_TTL);
+  
+
+
+  return {
+    accessToken,
+    refreshToken,
+    loggedInUser: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    },
+  }
+
+
+};
 
 export const authService = {
     sendOtp,

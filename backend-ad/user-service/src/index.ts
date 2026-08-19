@@ -20,7 +20,7 @@ app.use(reqLogger);
 app.use("/api/v1/auth", authRoutes);
 
 app.get("/", (_req, res) => {
-  res.send("Hello from User Service");
+  res.send("User Service is running");
 });
 
 app.get("/health", (_req, res) => {

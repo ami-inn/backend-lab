@@ -1,29 +1,38 @@
-import express from "express";
-import helmet from "helmet";
-
 import config from "@/config";
 import logger from "@/config/logger";
-import corsMiddleware from "@/middlewares/cors.middleware";
-import errorHandler from "@/middlewares/error.middleware";
-import requestLogger from "@/middlewares/req.middleware";
+import emailConsumer from "@/kafka/consumer/email.consumer";
 
-const app = express();
 
-app.use(helmet());
-app.use(corsMiddleware);
-app.use(express.json());
-app.use(requestLogger);
 
-app.get("/", (_req, res) => {
-  res.send("Notification Service is running");
+async function startNotificationService() {
+  try {
+    logger.info('Starting Notification Service...');
+    const missing = [
+      !config.SENDGRID_API_KEY && "SENDGRID_API_KEY",
+      !config.MAIL_SEND && "MAIL_SEND",
+    ].filter(Boolean);
+    if (missing.length > 0) {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+
+    await emailConsumer.start();
+    logger.info('Notification Service started successfully');
+  } catch (error) {
+    logger.error(`Failed to start Notification Service: ${error}`);
+    process.exit(1);
+  }
+}
+
+//handle uncaught error
+process.on('uncaughtException', (error) => {
+  logger.error(`Uncaught Exception: ${error}`);
+  process.exit(1);
 });
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "UP" });
+//handle unhandled promise rejection
+process.on('unhandledRejection', (reason) => {
+  logger.error(`Unhandled Rejection: ${reason}`);
+
 });
 
-app.use(errorHandler);
-
-app.listen(config.PORT, () => {
-  logger.info(`${config.SERVICE_NAME} is running on port ${config.PORT}`);
-});
+startNotificationService();

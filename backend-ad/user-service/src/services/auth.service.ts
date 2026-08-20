@@ -3,11 +3,13 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 
 import config from "@/config";
+import logger from "@/config/logger";
 import { prisma } from "@/config/prisma";
 import { redis } from "@/config/redis";
+import notificationProducer from "@/kafka/producer/notification.producer";
 import { SendOtpRequestBody } from "@/types/auth.types";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@/utils/auth";
-import { sendOtpEmail, sendAccountCreatedEmail } from "@/utils/email";
+import { sendAccountCreatedEmail } from "@/utils/email";
 import { BadRequestError, ConflictError, ForbiddenError } from "@/utils/error";
 import { generateAndStoreOtp, verifyOtp as verifyOtpValue } from "@/utils/otp";
 
@@ -40,9 +42,10 @@ const client = new OAuth2Client(config.GOOGLE_CLIENT_ID);
     const {otp,otpSessionId} = await generateAndStoreOtp(meta);
 
     //send otp to user via email or sms
-    await sendOtpEmail(email, otp);
-    // we send the send email in async way in the help of kafka or rabbitmq in production environment
-
+    // await sendOtpEmail(email, otp);
+    // we send the send email in async way in the help of kafka or rabbitmq i)n production environment
+    await notificationProducer.sendOtpEmail(email, otp, (config.OTP_TTL / 60));
+    logger.info(`OTP for ${email} queued successfully`);
     return {
       otpSessionId,
     };

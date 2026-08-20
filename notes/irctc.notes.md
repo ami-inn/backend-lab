@@ -125,3 +125,41 @@ structure
         email: "user@example.com"
     }
 }
+
+
+in signup with otp we save itin synchronous way. it has the blocking nature. so if we have 1000 request at a time, it will take a lot of time to process all the requests. so we can use asynchronous way to save the data in database. we can use message queue like rabbitmq, kafka, etc. to save the data in database. so it will not block the main thread and it will process the requests in background. so it will improve the performance of the application.
+
+
+we are using kafka .
+
+usersignup request
+user service generates otp
+event sent to kafka (instant)
+User gets immediate response
+Notification service pickup the event
+email sent via sendgrid
+auto-retry on failure (3 attempts)
+
+topics
+notification.email.otp.  - otp verification code
+notification.email.welcome - welcome email after successful signup
+
+the format of the message sent to the topic is as follows:
+Topic : notification.email.otp
+Message:{
+    "email": "",
+    "otp": "",
+    "ttlMinutes": 5
+}
+
+
+      KAFKA_BROKER_ID: 1 // Unique identifier for the Kafka broker
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181 // Connection string for the Zookeeper service
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT // Mapping of listener names to security protocols
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093 // List of listeners that the broker will advertise to clients
+      // List of listeners that the broker will advertise to clients
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT // Name of the listener used for inter-broker communication
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 // Replication factor for the offsets topic
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1 // Minimum number of in-sync replicas for the transaction state log
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 // Replication factor for the transaction state log
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true" // Enable automatic topic creation

@@ -44,7 +44,7 @@ const client = new OAuth2Client(config.GOOGLE_CLIENT_ID);
     //send otp to user via email or sms
     // await sendOtpEmail(email, otp);
     // we send the send email in async way in the help of kafka or rabbitmq i)n production environment
-    await notificationProducer.sendOtpEmail(email, otp, (config.OTP_TTL / 60));
+    await notificationProducer.sendOtpEmail(email, otp, config.OTP_TTL);
     logger.info(`OTP for ${email} queued successfully`);
     return {
       otpSessionId,

@@ -1,8 +1,7 @@
 import { connectProducer, producer } from "@/config/kafka";
 import logger from "@/config/logger";
-import { TOPICS } from "@/utils/constants";
-
 import type { NotificationMessageByTopic, NotificationTopic } from "@/types/notification.types";
+import { TOPICS } from "@/utils/constants";
 
 
 // this will prevent multiple connections to kafka producer

@@ -163,3 +163,21 @@ Message:{
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1 // Minimum number of in-sync replicas for the transaction state log
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 // Replication factor for the transaction state log
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true" // Enable automatic topic creation
+
+
+
+      prisma on amipk2001@gmail.com account
+
+
+
+      redis cache implementation
+
+
+      client ----> req----> server ----> db
+      client ----> req----> server ----> cache ----> db
+
+      redis is an in-memory data structure store that can be used as a cache to improve the performance of applications by reducing the number of database queries. It stores frequently accessed data in memory, allowing for faster retrieval compared to querying the database directly.
+
+      db is slow because it has to read data from disk, which takes more time compared to reading data from memory. By using a cache like Redis, we can store frequently accessed data in memory, which allows for faster retrieval and reduces the load on the database.
+
+      when a request is made to the server, the server first checks if the requested data is available in the cache. If it is, the server returns the data from the cache, which is much faster than querying the database. If the data is not available in the cache, the server queries the database, retrieves the data, and stores it in the cache for future requests.

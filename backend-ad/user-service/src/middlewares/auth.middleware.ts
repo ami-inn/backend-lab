@@ -14,12 +14,18 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     const accessToken = authHeader.split(" ")[1];
 
     try {
-        const decoded = verifyAccessToken(accessToken);
+        const payload = verifyAccessToken(accessToken);
     
         // // Attach the decoded user information to the request object for further use
         // req.user = decoded;
         // next();
+
+        req.user = {
+            id: payload.id,
+        }; // Assuming the payload contains user information
+        next();
     } catch (error) {
+        console.error("Error in requireAuth middleware:", error);
         throw new UnauthorizedError("Invalid or expired access token");
     }
 };

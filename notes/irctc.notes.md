@@ -181,3 +181,8 @@ Message:{
       db is slow because it has to read data from disk, which takes more time compared to reading data from memory. By using a cache like Redis, we can store frequently accessed data in memory, which allows for faster retrieval and reduces the load on the database.
 
       when a request is made to the server, the server first checks if the requested data is available in the cache. If it is, the server returns the data from the cache, which is much faster than querying the database. If the data is not available in the cache, the server queries the database, retrieves the data, and stores it in the cache for future requests.
+
+
+      API GATEWAY
+
+      the api gateway is a server that acts as an entry point for all client requests to the backend services. It handles routing, authentication, rate limiting, and other cross-cutting concerns. The API gateway can also aggregate responses from multiple services and return a single response to the client.

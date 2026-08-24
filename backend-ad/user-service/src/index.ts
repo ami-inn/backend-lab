@@ -9,6 +9,7 @@ import logger from "./config/logger";
 import corsMiddleware from "./middlewares/cors.middleware";
 import reqLogger from "./middlewares/req.middleware";
 import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(reqLogger);
 app.use("/api/v1/auth", authRoutes);
-
+app.use("/api/v1/user", userRoutes);
 app.get("/", (_req, res) => {
   res.send("User Service is running");
 });

@@ -1,0 +1,18 @@
+import "dotenv/config";
+
+const config = {
+  SERVICE_NAME: process.env.SERVICE_NAME || "apigateway",
+  PORT: Number(process.env.PORT || 4000),
+  NODE_ENV: process.env.NODE_ENV || "development",
+  LOG_LEVEL: process.env.LOG_LEVEL || "info",
+  ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : ["http://localhost:3000", "http://localhost:3001"],
+  USER_SERVICE_URL: process.env.USER_SERVICE_URL || "http://localhost:4001",
+  PAYMENT_SERVICE_URL: process.env.PAYMENT_SERVICE_URL || "http://localhost:4002",
+  SEARCH_SERVICE_URL: process.env.SEARCH_SERVICE_URL || "http://localhost:4003",
+  NOTIFICATION_SERVICE_URL: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:4004",
+  BOOKING_SERVICE_URL: process.env.BOOKING_SERVICE_URL || "http://localhost:4005",
+};
+
+export default config;

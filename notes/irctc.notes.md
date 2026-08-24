@@ -186,3 +186,8 @@ Message:{
       API GATEWAY
 
       the api gateway is a server that acts as an entry point for all client requests to the backend services. It handles routing, authentication, rate limiting, and other cross-cutting concerns. The API gateway can also aggregate responses from multiple services and return a single response to the client.
+
+
+      we put auth mechanism auth.middleware.ts in api gateway. so all the requests will go through the api gateway and it will check if the request is authenticated or not. if the request is authenticated, it will forward the request to the respective service. if the request is not authenticated, it will return 401 unauthorized error.
+
+      gateway is verify access token and navigate to the correct service. so we can put the auth middleware in the api gateway. so all the requests will go through the api gateway and it will check if the request is authenticated or not. if the request is authenticated, it will forward the request to the respective service. if the request is not authenticated, it will return 401 unauthorized error.

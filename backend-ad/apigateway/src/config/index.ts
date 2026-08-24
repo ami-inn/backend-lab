@@ -13,6 +13,13 @@ const config = {
   SEARCH_SERVICE_URL: process.env.SEARCH_SERVICE_URL || "http://localhost:4003",
   NOTIFICATION_SERVICE_URL: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:4004",
   BOOKING_SERVICE_URL: process.env.BOOKING_SERVICE_URL || "http://localhost:4005",
+  REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
+
+  JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || "your_access_secret",
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "your_refresh_secret",
+  JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
+  JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+  
 };
 
 export default config;

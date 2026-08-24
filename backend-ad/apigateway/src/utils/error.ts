@@ -44,10 +44,33 @@ class TooManyRequestsError extends AppError {
     }
 }
 
+class ServiceUnavailableError extends AppError {
+    constructor(message: string, code = 'SERVICE_UNAVAILABLE') {
+        super(message, 503, code);
+    }
+}
+
+class GatewayTimeoutError extends AppError {
+    constructor(message: string, code = 'GATEWAY_TIMEOUT') {
+        super(message, 504, code);
+    }
+}
+
 class InternalServerError extends AppError {
     constructor(message: string,code='INTERNAL_SERVER_ERROR') {
         super(message, 500, code);
     }
 }
 
-export { AppError, BadRequestError, ConflictError, UnauthorizedError, ForbiddenError, NotFoundError, InternalServerError, TooManyRequestsError };
+export {
+    AppError,
+    BadRequestError,
+    ConflictError,
+    UnauthorizedError,
+    ForbiddenError,
+    NotFoundError,
+    InternalServerError,
+    TooManyRequestsError,
+    ServiceUnavailableError,
+    GatewayTimeoutError,
+};

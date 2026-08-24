@@ -191,3 +191,23 @@ Message:{
       we put auth mechanism auth.middleware.ts in api gateway. so all the requests will go through the api gateway and it will check if the request is authenticated or not. if the request is authenticated, it will forward the request to the respective service. if the request is not authenticated, it will return 401 unauthorized error.
 
       gateway is verify access token and navigate to the correct service. so we can put the auth middleware in the api gateway. so all the requests will go through the api gateway and it will check if the request is authenticated or not. if the request is authenticated, it will forward the request to the respective service. if the request is not authenticated, it will return 401 unauthorized error.
+
+
+
+      circuit breaker implementation
+
+      without circuit pbreaker
+      - user service is down
+      - gateway keeps trying to connect to user service
+      - every request waits 30 seconds
+      - gateway gets overloaded with waiting requests
+      - gateway crashes due to overload
+      - entire system goes down
+
+      with circuit breaker
+        - user service is down
+        - first five requests fail and gateway opens the circuit
+        - next requests fail fast and return 503 service unavailable
+        - gateway stays healthy and can serve other requests
+        - after 60 seconds circuit test if service is up
+        - if service is up, circuit closes and gateway starts forwarding requests to user service

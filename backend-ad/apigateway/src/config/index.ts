@@ -14,6 +14,9 @@ const config = {
   NOTIFICATION_SERVICE_URL: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:4004",
   BOOKING_SERVICE_URL: process.env.BOOKING_SERVICE_URL || "http://localhost:4005",
   REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
+  SERVICE_TIMEOUT_MS: Number(process.env.SERVICE_TIMEOUT_MS || 10000),
+  CIRCUIT_BREAKER_THRESHOLD: Number(process.env.CIRCUIT_BREAKER_THRESHOLD || 5),
+  CIRCUIT_BREAKER_TIMEOUT: Number(process.env.CIRCUIT_BREAKER_TIMEOUT || 30000),
 
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || "your_access_secret",
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "your_refresh_secret",

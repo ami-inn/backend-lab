@@ -1,57 +1,61 @@
-// end point specific rate limiting middleware
-// example post /api/v1/auth/send-otp should be limited to 5 requests per hour
-import { Request, Response, NextFunction } from "express";
-import logger from "@/config/logger";
+import type { NextFunction, Request, Response } from "express";
+
 import { redis } from "@/config/redis";
-
-
 import { TooManyRequestsError } from "@/utils/error";
 
-
-
-//rate limiting strategies
-//1 ip based rate limiting
-//2 user based rate limiting
-//3 endpoint based rate limiting
-
-
-const rateLimiter = async (key: string, maxRequests: number, windowMs: number) => {
+const applyRateLimit = async (key: string, maxRequests: number, windowMs: number): Promise<void> => {
   const now = Date.now();
   const windowStart = now - windowMs;
 
-  try {
+  const pipeline = redis.pipeline();
+  pipeline.zremrangebyscore(key, 0, windowStart);
+  pipeline.zadd(key, now, `${now}`);
+  pipeline.expire(key, Math.ceil(windowMs / 1000));
+  pipeline.zcard(key);
 
-    // use redis pipeline for atomic operations
-    const pipeline = redis.pipeline();
+  const result = await pipeline.exec();
+  const zcardReply = result?.[3]?.[1];
+  const requestCount = typeof zcardReply === "number" ? zcardReply : Number(zcardReply ?? 0);
 
-    // remove old entries outside the window
-    pipeline.zremrangebyscore(key, 0, windowStart); // remove old requests
-
-    // add the current request
-    pipeline.zadd(key, now, now.toString());
-    // set the expiration for the key
-    pipeline.expire(key, Math.ceil(windowMs / 1000));
-    const execResult = await pipeline.exec();
-    const requestCount = await redis.zcard(key);
-    if (requestCount > maxRequests) {
-      throw new TooManyRequestsError("Too many requests");
-    }
-  } catch (error) {
-    console.error("Error in rateLimiter:", error);
-    throw error;
+  if (requestCount > maxRequests) {
+    throw new TooManyRequestsError("Too many requests");
   }
 };
 
-export const rateLimitMiddleware = (maxRequests: number, windowMs: number) => {
-  const requestCounts: Record<string, { count: number; timestamp: number }> = {};
+const rateLimitMiddleware = (prefix: string, maxRequests: number, windowMs: number) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
+      const key = `${prefix}:${req.method}:${req.path}:${ip}`;
+      await applyRateLimit(key, maxRequests, windowMs);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
 
+export const ipRateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
+  return rateLimitMiddleware("ratelimit:ip", maxRequests, windowMs);
+};
 
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    const endPoint = `${req.method}:${req.path}`;
-    const key = `ratelimit:endpoint:${endPoint}:${ip}`;
+export const endpointRateLimit = (maxRequests = 20, windowMs = 15 * 60 * 1000) => {
+  return rateLimitMiddleware("ratelimit:endpoint", maxRequests, windowMs);
+};
 
-    const result = await rateLimiter(key, maxRequests, windowMs);
-
+export const combinedRateLimit = (
+  ipMaxRequests = 100,
+  endpointMaxRequests = 20,
+  windowMs = 15 * 60 * 1000,
+) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
+      await applyRateLimit(`ratelimit:ip:${req.method}:${req.path}:${ip}`, ipMaxRequests, windowMs);
+      await applyRateLimit(`ratelimit:endpoint:${req.method}:${req.path}:${ip}`, endpointMaxRequests, windowMs);
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 };

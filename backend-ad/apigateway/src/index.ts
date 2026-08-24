@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(requestLogger);
 app.use(morgan("combined"));
 
-app.use("/api/v1", gatewayRoutes);
+app.use("/api", gatewayRoutes);
 
 app.get("/", (_req, res) => {
   res.send("API Gateway is running");

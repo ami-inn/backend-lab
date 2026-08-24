@@ -18,8 +18,8 @@ app.use(corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 app.use(reqLogger);
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/user", userRoutes);
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
 app.get("/", (_req, res) => {
   res.send("User Service is running");
 });

@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
 import { redis } from "@/config/redis";
+
 import { TooManyRequestsError } from "@/utils/error";
 
 const applyRateLimit = async (key: string, maxRequests: number, windowMs: number): Promise<void> => {

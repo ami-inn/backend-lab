@@ -211,3 +211,16 @@ Message:{
         - gateway stays healthy and can serve other requests
         - after 60 seconds circuit test if service is up
         - if service is up, circuit closes and gateway starts forwarding requests to user service
+    
+
+    search feature implementation
+
+    user provide source destination and date of journey. we will call the search service and it will return the list of trains available for that route on that date. we will use redis cache to store the search results for a particular route and date. so if the user searches for the same route and date again, we will return the results from the cache instead of calling the search service again. this will improve the performance of the application and reduce the load on the search service.
+
+    in source user provide
+    station name
+    city name
+    end station name
+    end city name
+
+    if user provide spelling mistake in station name or city name, we will use fuzzy search to find the closest match for the provided input. we will use levenshtein distance algorithm to calculate the distance between the provided input and the station names and city names in our database. we will return the closest match to the user. this will improve the user experience and help users find the correct station and city names even if they make spelling mistakes.

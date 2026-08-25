@@ -20,6 +20,24 @@ router.post(
 
 )
 
+router.get(
+    "/users/auth/refresh",
+    endpointRateLimit(10, 900000),
+    userServiceProxy
+)
+
+router.post(
+    "/users/auth/send-otp",
+    endpointRateLimit(10, 900000),
+    userServiceProxy
+)
+
+router.post(
+    "/users/auth/verify-otp",
+    endpointRateLimit(10, 900000),
+    userServiceProxy
+)
+
 // private routes
 router.get(
     "/users/user/profile",

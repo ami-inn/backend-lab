@@ -84,6 +84,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
+  console.log("Received request body:", req.body);
   const { email, password } = req.body as { email: string; password: string };
 
   if (!email || !password) {

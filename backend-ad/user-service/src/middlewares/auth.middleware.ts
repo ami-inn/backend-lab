@@ -22,7 +22,13 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
 
         req.user = {
             id: payload.id,
-        }; // Assuming the payload contains user information
+        }; // Assuming the payload contains user 
+        
+
+           // Forward authenticated user context
+        req.headers["x-user-id"] = String(payload.id);
+
+        console.log("Authenticated user ID:", payload.id);
         next();
     } catch (error) {
         console.error("Error in requireAuth middleware:", error);

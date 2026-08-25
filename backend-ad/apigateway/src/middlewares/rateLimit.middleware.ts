@@ -54,6 +54,7 @@ export const combinedRateLimit = (
       const ip = req.ip || req.socket.remoteAddress || "unknown";
       await applyRateLimit(`ratelimit:ip:${req.method}:${req.path}:${ip}`, ipMaxRequests, windowMs);
       await applyRateLimit(`ratelimit:endpoint:${req.method}:${req.path}:${ip}`, endpointMaxRequests, windowMs);
+      console.log(`Rate limit check passed for IP: ${ip}, Endpoint: ${req.method} ${req.path}`);
       next();
     } catch (error) {
       next(error);

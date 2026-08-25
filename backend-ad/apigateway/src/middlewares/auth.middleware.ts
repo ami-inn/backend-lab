@@ -10,6 +10,7 @@ type AuthenticatedRequest = Request & {
 };
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+    console.log("requireAuth middleware called");
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -29,6 +30,10 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
         authenticatedReq.user = {
             id: payload.id,
         }; // Assuming the payload contains user information
+
+        
+
+        console.log("Authenticated user ID:", payload.id);
         next();
     } catch (error) {
         console.error("Error in requireAuth middleware:", error);

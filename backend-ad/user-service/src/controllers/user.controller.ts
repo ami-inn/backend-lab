@@ -7,6 +7,7 @@ import asyncHandler from "@/utils/asyncHandler";
 
 
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
+    console.log("getProfile called");
     const userId = req.user?.id;
 
     if(!userId) {

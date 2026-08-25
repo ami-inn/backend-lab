@@ -12,12 +12,17 @@ import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 
 const app = express();
-
+console.log("User Service is running");
 app.use(helmet());
+console.log("User Service is running1");
 app.use(corsMiddleware);
+console.log("User Service is running2");
 app.use(express.json());
+console.log("User Service is running3");
 app.use(cookieParser());
+console.log("User Service is running4");
 app.use(reqLogger);
+console.log("User Service is running5");
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.get("/", (_req, res) => {

@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Station {
+  id String @id @default(cuid())
+
+  name String //New Delhi Railway Station
+
+  code String @unique //ndls
+
+  city String //New Delhi
+
+  state String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  routeStations RouteStation[]
+
+  @@index([name])
+  @@index([code])
+  @@map("stations")
+}
+
+// one station can be part of many routes, and one route can have many stations. This is a many-to-many relationship between Route and Station. The RouteStation model serves as the join table for this relationship.
+
+model Train {
+  id String @id @default(cuid())
+
+  trainName String //Rajdhani Express
+
+  trainNumber String @unique //12345
+
+  coachName String @default("AC") //Sleeper, AC, General
+
+  totalSeats Int
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  seats Seat[] // single coach of a train can have many seats. This is a one-to-many relationship between Train and Seat.
+
+  route Route? // one train can have only one route. This is a one-to-one relationship between Train and Route.
+
+  schedules Schedule[] // one train can have many schedules. This is a one-to-many relationship between Train and Schedule.
+
+  @@map("trains")
+}
+
+enum seatType {
+  LOWER
+
+  MIDDLE
+
+  UPPER
+
+  SIDE_LOWER
+
+  SIDE_UPPER
+}
+
+model Seat {
+  id String @id @default(cuid())
+
+  trainId String
+
+  seatNumber String //A1, A2, A3, B1, B2
+
+  seatType seatType
+
+  price Float
+
+  train Train @relation(fields: [trainId], references: [id], onDelete: Cascade) // on delete cascade means if a train is deleted, all its seats will be deleted as well.
+
+  @@unique([trainId, seatNumber]) //one train can have only one seat of each seat number
+  @@map("seats")
+}
+
+model Route {
+  id String @id @default(cuid())
+
+  trainId String @unique
+
+  train Train @relation(fields: [trainId], references: [id], onDelete: Cascade) // on delete cascade means if a train is deleted, its route will be deleted as well.
+
+  routeStations RouteStation[] // one route can have many stations. This is a one-to-many relationship between Route and RouteStation.
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("routes")
+}
+
+model RouteStation {
+  id String @id @default(cuid())
+
+  routeId String
+
+  stationId String
+
+  arrivalTime DateTime
+
+  departureTime DateTime
+
+  sequenceNumber Int // the order of the station in the route. For example, if a train goes from A to B to C, then A will have sequence 1, B will have sequence 2, and C will have sequence 3.
+
+  distanceFromOrigin Float @default(0) // distance from the source station in kilometers. For example, if a train goes from A to B to C, then A will have distance 0, B will have distance 100, and C will have distance 200.
+
+  sequence Int // the order of the station in the route. For example, if a train goes from A to B to C, then A will have sequence 1, B will have sequence 2, and C will have sequence 3.
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade) // on delete cascade means if a route is deleted, all its route stations will be deleted as well.
+
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade) // on delete cascade means if a station is deleted, all its route stations will be deleted as well.
+
+  @@unique([routeId, stationId]) //one route can have only one station of each station id
+  @@index([routeId]) // one route can have many stations. This is a one-to-many relationship between Route and RouteStation.
+  @@index([stationId]) // one station can be part of many routes. This is a one-to-many relationship between Station and RouteStation.
+  @@map("route_stations")
+}
+
+enum ScheduleStatus {
+  ACTIVE
+
+  NON_ACTIVE
+
+  CANCELLED
+
+  DELAYED
+}
+
+model Schedule {
+  id String @id @default(cuid())
+
+  trainId String
+
+  departureDate DateTime @db.Date
+
+  status ScheduleStatus @default(ACTIVE) // ACTIVE, CANCELLED, DELAYED
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  train Train @relation(fields: [trainId], references: [id], onDelete: Cascade) // on delete cascade means if a train is deleted, all its schedules will be deleted as well.
+
+  @@unique([trainId, departureDate]) //one train can have only one schedule of each departure date same train can not run twice on same datwe
+  @@index([trainId]) // one train can have many schedules. This is a one-to-many relationship between Train and Schedule.
+  @@map("schedules")
+}

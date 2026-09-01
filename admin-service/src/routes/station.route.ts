@@ -14,5 +14,5 @@ router.put('/station/:id', getUserContext, updateStation);
 router.delete('/station/:id', getUserContext, deleteStation);
 router.get('/station/:id', getUserContext, getStationById);
 //end of admin station routes
-
+router.get('/station/search', getUserContext, getAllStations);
 export default router;

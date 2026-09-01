@@ -1,22 +1,11 @@
-
-import {prisma} from "@/config/prisma";
 import logger from "@/config/logger";
+import { prisma } from "@/config/prisma";
 import { ConflictError } from "@/utils/error";
-import adminProducer
-
-from "@/kafka/producer/admin.producer";
-enum seatType {
-  LOWER = "LOWER",
-  MIDDLE = "MIDDLE",
-  UPPER = "UPPER",
-  SIDE_LOWER = "SIDE_LOWER",
-  SIDE_UPPER = "SIDE_UPPER"
-}
-
+import adminProducer from "@/kafka/producer/admin.producer";
 
 type SeatInput = {
   seatNumber: string;
-  seatType: seatType;
+  seatType:  "LOWER" | "UPPER" | "SIDE_LOWER" | "SIDE_UPPER";
   seatPrice: number;
 };
 
@@ -27,7 +16,7 @@ type CreateTrainInput = {
   seats: SeatInput[];
 };
 
-export const createTrain = async (data: CreateTrainInput) => {
+const createTrain = async (data: CreateTrainInput) => {
   const {
     trainName,
     trainNumber,
@@ -35,7 +24,7 @@ export const createTrain = async (data: CreateTrainInput) => {
     seats,
   } = data;
 
-  // Check whether train already exists
+  // Check if train already exists
   const existing = await prisma.train.findUnique({
     where: {
       trainNumber,
@@ -50,7 +39,7 @@ export const createTrain = async (data: CreateTrainInput) => {
 
   // Check for duplicate seat numbers
   const seatNumbers = seats.map(
-    (seat) => seat.seatNumber,
+    (s) => s.seatNumber,
   );
 
   if (
@@ -62,7 +51,7 @@ export const createTrain = async (data: CreateTrainInput) => {
     );
   }
 
-  // Create train and seats
+  // Create train with seats
   const train = await prisma.train.create({
     data: {
       trainName,
@@ -71,10 +60,10 @@ export const createTrain = async (data: CreateTrainInput) => {
       totalSeats: seats.length,
 
       seats: {
-        create: seats.map((seat) => ({
-          seatNumber: seat.seatNumber,
-          seatType: seat.seatType,
-          price: seat.seatPrice,
+        create: seats.map((s) => ({
+          seatNumber: s.seatNumber,
+          seatType: s.seatType,
+          price: s.seatPrice,
         })),
       },
     },
@@ -100,7 +89,7 @@ export const createTrain = async (data: CreateTrainInput) => {
       coachName,
       seats,
     })
-    .catch((err: Error) => {
+    .catch((err) => {
       logger.error(
         `Failed to publish train created event for number: ${trainNumber}`,
         err,
@@ -109,3 +98,5 @@ export const createTrain = async (data: CreateTrainInput) => {
 
   return train;
 };
+
+export default createTrain;

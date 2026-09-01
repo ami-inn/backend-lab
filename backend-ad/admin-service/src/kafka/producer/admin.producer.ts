@@ -2,7 +2,7 @@ import { connectProducer, producer } from "@/config/kafka";
 
 
 import logger from "@/config/logger";
-import { AdminMessageByTopic,NotificationTopic } from "@/utils/types/admin.types";
+import { AdminMessageByTopic,AdminTopic } from "@/utils/types/admin.types";
 import { TOPICS } from "@/utils/constants";
 
 // this will prevent multiple connections to kafka producer
@@ -21,7 +21,7 @@ class AdminProducer {
         }
     }
 
-    async sendMessage<T extends NotificationTopic>(
+    async sendMessage<T extends AdminTopic>(
         topic: T,
         key: string,
         message: AdminMessageByTopic[T],
@@ -46,6 +46,10 @@ class AdminProducer {
 
     async publishStationCreatedEvent(station: { name: string; code: string; city: string; state: string }) {
         return this.sendMessage(TOPICS.STATION_CREATED, `station-${station.code}`, {eventType:'STATION_CREATED', data: station, timestamp: new Date().toISOString() });
+    }
+
+    async publishTrainCreatedEvent(train: { trainName: string; trainNumber: string; coachName: string; seats: { seatNumber: string; seatType: string; seatPrice: number }[] }) {
+        return this.sendMessage(TOPICS.TRAIN_CREATED, `train-${train.trainNumber}`, {eventType:'TRAIN_CREATED', data: train, timestamp: new Date().toISOString() });
     }
 }
 

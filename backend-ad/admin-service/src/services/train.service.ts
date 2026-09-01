@@ -16,6 +16,13 @@ type CreateTrainInput = {
   seats: SeatInput[];
 };
 
+type updateTrainInput = {
+  trainName?: string;
+  trainNumber?: string;
+  coachName?: string;
+  seats?: SeatInput[];
+};
+
 const createTrain = async (data: CreateTrainInput) => {
   const {
     trainName,
@@ -99,4 +106,101 @@ const createTrain = async (data: CreateTrainInput) => {
   return train;
 };
 
-export default createTrain;
+const getAllTrains = async () => {
+  const trains = await prisma.train.findMany({
+    include: {
+      seats: {
+        orderBy: {
+          seatNumber: "asc",
+        },
+      },
+    },
+  });
+  return trains;
+};
+
+const getTrainById = async (id: string) => {
+  const train = await prisma.train.findUnique({
+    where: { id },
+    include: {
+      seats: {
+        orderBy: {
+          seatNumber: "asc",
+        },
+      },
+    },
+  });
+
+  if (!train) {
+    throw new ConflictError(
+      `Train with id ${id} does not exist`,
+    );
+  }
+
+  return train;
+};
+
+export const updateTrain = async (
+  id: string,
+  data: updateTrainInput,
+) => {
+  const { seats, ...trainData } = data;
+
+  const train = await prisma.train.update({
+    where: {
+      id,
+    },
+
+    data: {
+      ...trainData,
+
+      ...(seats
+        ? {
+            totalSeats: seats.length,
+
+            seats: {
+              deleteMany: {},
+
+              create: seats.map((seat) => ({
+                seatNumber: seat.seatNumber,
+                seatType: seat.seatType,
+                price: seat.seatPrice,
+              })),
+            },
+          }
+        : {}),
+    },
+
+    include: {
+      seats: {
+        orderBy: {
+          seatNumber: "asc",
+        },
+      },
+    },
+  });
+
+  return train;
+};
+
+export const deleteTrain = async (id: string) => {
+  const train = await prisma.train.delete({
+    where: { id },
+  });
+
+  logger.info(
+    `Train deleted successfully with id: ${id}`,
+  );
+
+  return train;
+};
+
+export const trainService = {
+  createTrain,
+  getAllTrains,
+  getTrainById,
+  updateTrain,
+  deleteTrain,
+};
+
+export default trainService;

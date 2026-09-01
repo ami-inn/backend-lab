@@ -9,10 +9,14 @@ const config = {
     ? process.env.ALLOWED_ORIGINS.split(",")
     : ["http://localhost:3000", "http://localhost:3001"],
   USER_SERVICE_URL: process.env.USER_SERVICE_URL || "http://localhost:4001",
-  PAYMENT_SERVICE_URL: process.env.PAYMENT_SERVICE_URL || "http://localhost:4002",
+  ADMIN_SERVICE_URL: process.env.ADMIN_SERVICE_URL || "http://localhost:4006",
+  PAYMENT_SERVICE_URL:
+    process.env.PAYMENT_SERVICE_URL || "http://localhost:4002",
   SEARCH_SERVICE_URL: process.env.SEARCH_SERVICE_URL || "http://localhost:4003",
-  NOTIFICATION_SERVICE_URL: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:4004",
-  BOOKING_SERVICE_URL: process.env.BOOKING_SERVICE_URL || "http://localhost:4005",
+  NOTIFICATION_SERVICE_URL:
+    process.env.NOTIFICATION_SERVICE_URL || "http://localhost:4004",
+  BOOKING_SERVICE_URL:
+    process.env.BOOKING_SERVICE_URL || "http://localhost:4005",
   REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
   SERVICE_TIMEOUT_MS: Number(process.env.SERVICE_TIMEOUT_MS || 10000),
   CIRCUIT_BREAKER_THRESHOLD: Number(process.env.CIRCUIT_BREAKER_THRESHOLD || 5),
@@ -22,7 +26,6 @@ const config = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "your_refresh_secret",
   JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
-  
 };
 
 export default config;

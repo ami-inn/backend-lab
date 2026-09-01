@@ -9,7 +9,7 @@ export interface WelcomeEmailNotification {
 }
 
 export interface AdminMessageByTopic {
-    "station.created": {
+    "admin.station.created": {
         eventType: 'STATION_CREATED';
         data: {
             name: string;

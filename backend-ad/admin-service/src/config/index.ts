@@ -1,5 +1,7 @@
+import "dotenv/config";
+
 const config = {
-    PORT: process.env.PORT || 4003,
+    PORT: process.env.PORT || 4006,
     SERVICE_NAME: 'Admin Service',
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://admin:irctcpass@localhost:5432/admin-service_database',
     NODE_ENV: process.env.NODE_ENV || 'development',

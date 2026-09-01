@@ -11,10 +11,10 @@ export const createStation = asyncHandler(async (req: Request, res: Response) =>
     const {name,code,city,state} = req.body;
 
     // Validate required fields
-    if (!name || !code || !city || !state || !location || !status) {
+    if (!name || !code || !city || !state ) {
         return new BadRequestError("Missing required fields: name, code, city, state, location, status");
     }
-
+    
     const station = await stationService.createStation({name, code: code.toUpperCase(), city, state});
     return res.status(201).json({
         success: true,

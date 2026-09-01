@@ -10,7 +10,6 @@ const router = express.Router();
 
 const userServiceProxy = createProxy("userservice", config.USER_SERVICE_URL);
 
-
 //public routes
 
 router.post(
@@ -46,6 +45,17 @@ router.get(
     userServiceProxy
 )
 
+
+const adminServiceProxy = createProxy("adminservice", config.ADMIN_SERVICE_URL);
+
+//public routes
+router.post(
+    "/admin/stations/station",
+    requireAuth,
+    endpointRateLimit(10, 900000),
+    adminServiceProxy
+)
+
 //gateway health
 router.get(
     "/health",
@@ -53,5 +63,8 @@ router.get(
         res.status(200).json({ status: "UP" });
     }
 )
+
+
+
 
 export default router;

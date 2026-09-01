@@ -99,6 +99,7 @@ const circuitBreakers: Record<string, CircuitBreaker> = {
   searchservice: new CircuitBreaker("search-service"),
   bookingservice: new CircuitBreaker("booking-service"),
   notificationservice: new CircuitBreaker("notification-service"),
+  adminservice: new CircuitBreaker("admin-service"),
 };
 
 interface ForwardResult {

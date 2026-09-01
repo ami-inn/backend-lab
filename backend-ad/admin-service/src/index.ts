@@ -9,7 +9,7 @@ import logger from './config/logger';
 import corsMiddleware from './middlewares/cors.middleware';
 import requestLogger from './middlewares/req.middleware';
 import stationRoutes from './routes/station.route';
-
+import trainRoutes from './routes/train.route'
 const app = express()
 
 app.use(helmet())
@@ -24,6 +24,7 @@ app.get('/', (_req, res) => {
 })
 
 app.use('/stations', stationRoutes);
+app.use('/trains', trainRoutes);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'UP' })

@@ -5,6 +5,7 @@ import { requireAuth } from "@/middlewares/auth.middleware";
 import { combinedRateLimit, endpointRateLimit } from "@/middlewares/rateLimit.middleware";
 import { createProxy } from "@/services/proxy";
 
+
 const router = express.Router();
 
 
@@ -51,6 +52,68 @@ const adminServiceProxy = createProxy("adminservice", config.ADMIN_SERVICE_URL);
 //public routes
 router.post(
     "/admin/stations/station",
+    requireAuth,
+    endpointRateLimit(10, 900000),
+    adminServiceProxy
+)
+
+router.get(
+    "/admin/stations/station",
+    requireAuth,
+    combinedRateLimit(),
+    adminServiceProxy
+)
+
+router.put(
+    "/admin/stations/station/:id",
+    requireAuth,
+    endpointRateLimit(10, 900000),
+    adminServiceProxy
+)
+
+router.delete(
+    "/admin/stations/station/:id",
+    requireAuth,
+    endpointRateLimit(10, 900000),
+    adminServiceProxy
+)
+
+router.get(
+    "/admin/stations/station/:id",
+    requireAuth,
+    combinedRateLimit(),
+    adminServiceProxy
+)
+
+// train routes
+router.get(
+    "/admin/trains/train",
+    requireAuth,
+    combinedRateLimit(),
+    adminServiceProxy
+)
+router.put(
+    "/admin/trains/train/:id",
+    requireAuth,
+    endpointRateLimit(10, 900000),
+    adminServiceProxy
+)
+
+router.delete(
+    "/admin/trains/train/:id",
+    requireAuth,
+    endpointRateLimit(10, 900000),
+    adminServiceProxy
+)
+
+router.get(
+    "/admin/trains/train/:id",
+    requireAuth,
+    combinedRateLimit(),
+    adminServiceProxy
+)
+router.post(
+    "/admin/trains/train",
     requireAuth,
     endpointRateLimit(10, 900000),
     adminServiceProxy

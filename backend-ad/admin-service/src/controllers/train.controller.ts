@@ -1,111 +1,25 @@
 
-import {prisma} from "@/config/prisma";
+
 import logger from "@/config/logger";
-import { ConflictError } from "@/utils/error";
-import adminProducer
-
-from "@/kafka/producer/admin.producer";
-enum seatType {
-  LOWER = "LOWER",
-  MIDDLE = "MIDDLE",
-  UPPER = "UPPER",
-  SIDE_LOWER = "SIDE_LOWER",
-  SIDE_UPPER = "SIDE_UPPER"
-}
+import { ConflictError,BadRequestError } from "@/utils/error";
+import createTrain from "@/services/train.service";
+import asyncHandler from "@/utils/asyncHandler";
+import { Request, Response } from "express";
 
 
-type SeatInput = {
-  seatNumber: string;
-  seatType: seatType;
-  seatPrice: number;
-};
 
-type CreateTrainInput = {
-  trainName: string;
-  trainNumber: string;
-  coachName: string;
-  seats: SeatInput[];
-};
+export const createTrainController = asyncHandler(async (req: Request, res: Response) => {
+    const { trainName, trainNumber, coachName, seats } = req.body;
 
-export const createTrain = async (data: CreateTrainInput) => {
-  const {
-    trainName,
-    trainNumber,
-    coachName,
-    seats,
-  } = data;
+    console.log("Received request to create train:", { trainName, trainNumber, coachName, seats });
 
-  // Check whether train already exists
-  const existing = await prisma.train.findUnique({
-    where: {
-      trainNumber,
-    },
-  });
+    // Validate input
+    if (!trainName || !trainNumber || !coachName || !seats) {
+      throw new BadRequestError("Missing required fields: trainName, trainNumber, coachName, seats");
+    }
 
-  if (existing) {
-    throw new ConflictError(
-      `Train with number ${trainNumber} already exists`,
-    );
-  }
+    // Call the service to create the train
+    const newTrain = await createTrain({ trainName, trainNumber, coachName, seats });
 
-  // Check for duplicate seat numbers
-  const seatNumbers = seats.map(
-    (seat) => seat.seatNumber,
-  );
-
-  if (
-    new Set(seatNumbers).size !==
-    seatNumbers.length
-  ) {
-    throw new ConflictError(
-      "Duplicate seat numbers found in the request",
-    );
-  }
-
-  // Create train and seats
-  const train = await prisma.train.create({
-    data: {
-      trainName,
-      trainNumber,
-      coachName,
-      totalSeats: seats.length,
-
-      seats: {
-        create: seats.map((seat) => ({
-          seatNumber: seat.seatNumber,
-          seatType: seat.seatType,
-          price: seat.seatPrice,
-        })),
-      },
-    },
-
-    include: {
-      seats: {
-        orderBy: {
-          seatNumber: "asc",
-        },
-      },
-    },
-  });
-
-  logger.info(
-    `Train created successfully with number: ${trainNumber}`,
-  );
-
-  // Publish Kafka event
-  await adminProducer
-    .publishTrainCreatedEvent({
-      trainName,
-      trainNumber,
-      coachName,
-      seats,
-    })
-    .catch((err: Error) => {
-      logger.error(
-        `Failed to publish train created event for number: ${trainNumber}`,
-        err,
-      );
-    });
-
-  return train;
-};
+    return res.status(201).json(newTrain);
+});

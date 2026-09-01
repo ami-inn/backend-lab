@@ -13,7 +13,7 @@ class AdminProducer {
     }
 
     isInitiated: boolean;
-
+    
     async initialize() {
         if(!this.isInitiated){
             await connectProducer();
